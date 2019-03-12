@@ -1,0 +1,173 @@
+<div id='bienvenida'>
+<div class="col-sm-12" style="text-align: center"><h3>
+Bienvenido, 
+<?php
+    echo $username;  
+    $this->headScript()->appendFile($this->basepath("js/egresado/checkDatos.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/checkCita.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/createInput.js"));
+    $this->headScript()->appendFile($this->basepath("js/datepicker/horas.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/mostrarInfo.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/regresar.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/setRequisito.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/showDescripcion.js"));    
+?>
+</h3></div><br>
+
+<?php 
+    if ($status=='NUEVO'){
+        echo utf8_encode("
+        <div class='container' style='text-align:center'><blockquote>
+            <p><br>A continuación se te presentan las opciones disponibles por las cuales podrás iniciar tu trámite de titulación,
+        	ten en cuenta que según la opción que elijas tendrás que proporcionar los documentos que se te soliciten.
+        </p></blockquote></div><br>
+        <div class='row'>
+        ");
+        $item = 0;
+        foreach ($opciones as $opcion):
+        if (($item%3)==0)echo "</div><br><div class='row'>";
+            echo 
+                "<div class='col-sm-4' style='text-align:center' onClick='show_descripcion(".$opcion['idOpciones'].")'>
+                        <img src='img/".$opcion['imagen']."' class='img-responsive center-block' width='30%' onClick='show_descripcion(".$opcion['idOpciones'].")'>
+                        <b>".$opcion['nombre']."</b><br>
+                </div>";
+            $item++;
+        endforeach;
+        echo "</div><br>";
+        ?>
+        </div>
+        <!-- Termina bienvenida -->
+        <div id="citas" style="display: none" class="container">
+		<div class="col-sm-4 well" id="instrucciones" >
+			<h3 style="text-align: center; color:#426eb5">1.- Instrucciones</h3>
+			<p id="nombre_opcion" style="text-align: center; font-weight: bold"></p>
+			<p style="text-align: justify">
+				<?php echo utf8_encode("<b>A)</b> Según la opción que hayas elegido se te solicitará subir los archivos necesarios.");?>
+			</p><br>
+			<p style="text-align: justify">
+				<?php echo utf8_encode("<b>B)</b> Después que hayas preparado tus archivos, procede a seleccionar una fecha y hora.");?>
+			</p><br>
+			<p style="text-align: justify">
+				<?php echo utf8_encode("<b>C)</b> Acude el día señalado 10 minutos antes de tu cita y ten listos tus documentos.");?>
+			</p><br>
+			<p style="text-align: justify">
+					<?php echo utf8_encode("<b>D)</b> Si deseas explorar otras opciones de titulación puedes regresar <a href='javascript:regresar()'>aquí</a>.");?>
+			</p>
+		</div>	
+		<!-- Archivos -->
+		<form method="post" id="datosForm" enctype="multipart/form-data" action="egresado/checkDatos" onSubmit="return checkDatos(this)">
+			<div class="col-sm-4 well" id="requisitos">		
+				<h3 style="text-align: center; color:#426eb5"><?php echo utf8_encode("2.- Sube tus requisitos");?></h3><br>
+				<div id="inputs_requisitos">
+				</div>
+				<button type="submit" class="btn btn-primary center-block" id="submit-datos-btn">Subir</button>		
+			</div>
+			<div id="info_hidden">
+				<input type="hidden" value="" id="opcion_hidden" name="opcion_hidden">
+			</div>
+		</form>
+		
+		<!-- Citas  -->
+			<div class="col-sm-4 well" id="calendario">
+				<h3 style="text-align: center; color:#426eb5">3.- Agenda tu cita</h3>
+				<div style="padding-top: 10%">
+				<form method="post" id="citaForm" onSubmit="return checkCita('insert', 'citaForm', 'egresado/checkCita', 'DIVISION')" action="egresado/">
+					<label for="datepicker"><?php echo utf8_encode("Puedes reagendar tu cita más adelante.");?></label>
+					<input type="text" id="datepicker" name="datepicker" size="29" class="center-block" placeholder="Selecciona una fecha" onChange="horas('egresado/getHours', 'DIVISION')" readonly>
+					<br>
+					<div id="horas_div">
+						<label for="hour">Selecciona una hora</label><br>
+						<select id="hour" name="hour" class="center-block" required>
+							<option value="">hh:mm</option>			
+						</select>	
+					</div>
+					<br>
+					<button type="submit" class="btn btn-primary center-block" style="display:none;" id="submit-cita-btn">Agendar Cita</button>		
+				</form>
+				</div>
+			</div>
+	</div>
+
+    <!-- Modal -->
+	<div id="opcionModal" class="modal fade" role="dialog">
+	  <div class="modal-dialog">
+	    <!--Contenido-->
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h4 class="modal-title" style="font-weight:bold" id="modal-title"></h4>
+	      </div>
+	      <div class="modal-body">
+	        <p id="modal-descripcion" style="text-align: justify; color:black"></p><br>
+	        <div id="modal-requisitos" style="font-weight:bold; color: #426eb5">
+	        </div>
+	      </div>
+	      <div class="modal-footer">
+	      	<form id="form_select">
+	     		 <button type="submit" class="btn btn-primary">Seleccionar</button>
+	     		 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+	      	</form>
+	      </div>
+	    </div>	
+	  </div>
+	</div>
+    <!-- Termina Modal -->
+    <?php 
+        
+    }
+    if ($status=='CITA AGENDADA'){
+        ?>
+        <div class="row">
+        <br>
+        	<div class="col-sm-12" style="text-align:center">
+        	<label>Tu cita ha sido agendada:</label>
+        	<div>
+        		<?php
+        		  setlocale(LC_TIME, 'es');
+        	      echo strftime("%d de %B de %Y",strtotime($cita[0]["fecha"]))." a las ".substr($cita[0]["hora"], 0, 5)." hrs.";
+                ?>
+        	</div>
+        	</div>        	
+        </div>
+        <div> <p style="font-weight: bold;text-align: center;">Imprime tu <a href="../documentos/index/1/<?php echo $usercontrol;?>" target="_blank">Solicitud de Autorizaci&oacute;n</a> y la entregaras en el momento de tu cita junto con tus requisitos en la division de estudios.</p>
+        <br>
+        <br>
+
+
+
+
+        </div>
+        <?php
+    }
+    if ($calendar==true){
+        ?>
+        <div class="row">
+        <div class="col-sm-12" style="text-align:center">
+        	<?php echo utf8_encode("Si deseas modificar la fecha y hora de tu cita puedes hacerlo aquí:");?>
+        	<form method="post" id="updateForm" onSubmit="return checkCita('update', 'updateForm', 'egresado/checkCita','DIVISION')">
+        	<input type="text" id="datepicker" name="datepicker" size="29" class="center-block" placeholder="Selecciona una fecha" onChange="horas('getHours', 'DIVISION')" readonly>
+       	 	<div id="horas_div">
+        		<select id="hour" name="hour" class="center-block" required>
+        			<option value="">hh:mm</option>
+        		</select>
+        	</div>
+        	<input type="submit" class="btn btn-primary" value="Reagendar" >
+
+        	</form>
+        </div>
+        </div>
+        <?php 
+    }
+?>
+<script>
+	<?php 
+	   echo "var holidays =".json_encode($holidays)."; ";
+	   echo "var parts_i = '".$config['f_inicio']."'.split('-'); ";
+	   echo "var parts_f = '".$config['f_fin']."'.split('-'); ";	
+	?>  
+	var inicio = Date.UTC(parts_i[0], parts_i[1]-1, parts_i[2]);
+	var fin = Date.UTC(parts_f[0], parts_f[1]-1, parts_f[2]);
+	
+	$( function() {
+		datePicker();
+  	} );  	
+</script>

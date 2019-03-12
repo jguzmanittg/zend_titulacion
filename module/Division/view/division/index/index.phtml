@@ -1,0 +1,410 @@
+<?php 
+$this->headScript()->appendFile($this->basepath("js/division/horas.js"));
+$this->headScript()->appendFile($this->basepath("js/datepicker/horasEscolares.js"));
+$this->headScript()->appendFile($this->basepath("js/division/checkCita.js"));
+?>
+<div class="row">
+	<div class="col-sm-2"></div>
+	<div class="col-sm-8">
+		<table id="data-table" class="display" style="border-collapse: collapse; border-spacing: 0; width:100%;">
+			<thead>
+				<tr>
+					<th style="text-align: center; white-space: nowrap;">Estado</th>
+            		<th style="text-align: center; white-space: nowrap;">NC</th>
+                	<th style="text-align: center; white-space: nowrap;">Nombre</th>
+                	<th style="text-align: center; white-space: nowrap;">Carrera</th>
+                	<th style="text-align: center; white-space: nowrap;">Opción</th>                	
+                	<th style="text-align: center; white-space: nowrap;">Cita</th>
+                	<th style="text-align: center; white-space: nowrap;">Lugar</th>
+                	<th style="text-align: center; white-space: nowrap;">Acciones</th>
+            	</tr>
+			</thead>
+			<tbody style="color:black">
+	<?php 
+	setlocale(LC_TIME, 'es');
+        foreach($tramites as $item):
+            echo "  <tr>
+		               <td style='text-align: center; font-size: x-small; white-space: nowrap;'>".$item["estado"]."</td>
+            		   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["Egresado_numControl"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["nombreComp"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["carrera"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["nombre"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".strftime('%d de %B de %Y',strtotime($item['fecha']))." a las ".substr($item['hora'], 0, 5)." hrs.</td>
+            	       <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item['lugar']."</td>
+                	   <td style='white-space: nowrap;'>
+	                       <button type='button' class='btn btn-xs' aria-label='Left Align' onClick=infoModal('".$item["Egresado_numControl"]."')>
+                                <span class='glyphicon glyphicon-th-large' aria-hidden='true'>
+	                            </span>
+                           </button>
+	                       <button type='button' class='btn btn-xs' aria-label='Left Align' onClick=redateModal('".$item["Egresado_numControl"]."')>
+                                <span class='glyphicon glyphicon-calendar' aria-hidden='true'>
+	                            </span>
+                           </button>
+	                       <button type='button' class='btn btn-xs' aria-label='Left Align' onClick=revokeModal('".$item["Egresado_numControl"]."')>
+                                <span class='glyphicon glyphicon-remove' aria-hidden='true'>
+	                            </span>
+                           </button>
+	                   </td>
+	               </tr>";
+        endforeach;
+    ?>
+    		</tbody>
+    	</table>
+	</div>
+	<div class="col-sm-2"></div>
+</div>
+
+<!-- <Modal> -->
+<div id="Modal" class="modal fade" role="dialog">
+	  <div class="modal-dialog">
+	    <!--Contenido-->
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h4 class="modal-title" style="font-weight:bold" id="modal-title"></h4>
+	      </div>
+	      <div class="modal-body">
+	        <p id="modal-description" style="text-align: justify; color:black"></p><br>
+	        <div id="modal-inputs" style="font-weight:bold; color: #426eb5">
+	        </div>
+	       
+	      </div>
+	      <div class="modal-footer">
+	     		 <button type="button" class="btn btn-primary" id="modal-submit"></button>
+	     		 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+	      </div>
+	    </div>	
+	  </div>
+</div>
+<!-- </Modal> -->
+<script>
+    <?php 
+	   echo "var holidays =".json_encode($holidays).";";
+	   echo "var parts_i = '".$config[0]['f_inicio']."'.split('-'); ";
+	   echo "var parts_f = '".$config[0]['f_fin']."'.split('-'); ";	
+	   
+	   echo "var eparts_i = '".$cfgE[0]['f_inicio']."'.split('-'); ";
+	   echo "var eparts_f = '".$cfgE[0]['f_fin']."'.split('-'); ";
+	?>  
+	var inicio = Date.UTC(parts_i[0], parts_i[1]-1, parts_i[2]);
+	var fin = Date.UTC(parts_f[0], parts_f[1]-1, parts_f[2]);
+
+	var inicioE = Date.UTC(eparts_i[0], eparts_i[1]-1, eparts_i[2]);
+	var finE = Date.UTC(eparts_f[0], eparts_f[1]-1, eparts_f[2]);
+		
+
+	$(document).ready(function() {
+		var table =
+    		$('#data-table').DataTable({
+    			scrollX: true,
+    			});
+		
+    	new $.fn.dataTable.FixedColumns( table, {
+    			leftColumns:0, rightColumns:1
+    		});
+	});
+
+	function clearModal(){
+		$('#modal-title').html("");
+		$('#modal-description').html("");
+		$('#modal-inputs').html("");
+		$('#modal-submit').html("");	
+		$('#modal-submit').off();	
+		$('#modal-submit').show();
+		$('#modal-submit').removeClass();
+	}
+
+	function infoModal(egresado){
+		clearModal();
+		$('#modal-title').html("Informaci&oacuten del Egresado " + egresado);
+		$.post("division/getEgresadoInfo",
+				{"egresado":egresado},
+				function (data, status){
+					 
+					//Nombre y datos del egresado
+					var html="";
+					$('#modal-description').html("<h3>"+data["info"][0]["nombre"]+"</h3>"+
+							"<b>Nombre:</b>"+decodeURIComponent(escape(data["info"][0]["nombreComp"]))+"<br>");
+					//Información escrita agregada por el egresado
+
+					html=html+"REQUISITOS ENTREGADOS:<br>";
+					$.each(data["requisitos"], function (key, value){
+						html=html+"<b>"+unescape(value["nombre"])+":</b> "+decodeURIComponent(escape(value["datos"]))+"<br>";
+					});
+					$('#modal-description').html($('#modal-description').html()+html+"<b>Documentos</b><br>");
+					//Documentos subidos por el egresado al sistema
+					html="";
+					$.each(data["docs"], function (key, value){
+						html=html+"<a href='<?php echo $this->basePath();?>/uploads/"+value["idRequisitos"]+egresado+"' target='_blank'>"+value["nombre"]+"</a><br>";
+					});
+					$('#modal-description').html($('#modal-description').html()+html);
+					
+					switch (data["info"][0]["estado"]){
+							case "CITA AGENDADA": 
+								$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<b><a href='../documentos/index/2/"+egresado+"' target=_blank>Imprimir Solicitud de Asesores</a></b>");
+							$('#modal-submit').html("SOLICIAR ASESORES");
+							$("#modal-submit").addClass("btn btn-primary");
+							$("#modal-submit").on('click', function (){
+								$.post("<?php echo $this->basepath("division/nuevoEstadoTramite");?>",
+										{'nc':egresado,
+										'estado':'SOLICITUD ASESORES'},
+										function (data, status){
+											if (data["response"]){
+												location.reload();
+												}
+											else
+												alert("Ha ocurrido un error, por favor intente de nuevo.");
+											});
+								});
+							break;	
+
+
+							case "SOLICITUD ASESORES":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<b><a href='../documentos/index/2/"+egresado+"' target=_blank>Imprimir Solicitud de Asesores</a></b>");
+							$("#modal-submit").hide();
+							break;
+							case "REVISION ESCOLARES":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<b><a href='../documentos/index/5/"+egresado+"' target=_blank>Pase para integrar documentación en escolares.</a></b>" +"<br>"+
+								"<b><a href='../documentos/index/6/"+egresado+"' target=_blank>Requisitos para Integrar expediente en escolares.</a></b>");
+							$("#modal-submit").hide();
+							break;
+
+
+
+							case "SOLICITUD JURADO":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<b><a href='../documentos/index/10/"+egresado+"' target=_blank>Solicitud de Jurado.</a></b>");
+
+
+
+							$("#modal-submit").hide();
+
+							break;
+						case "ASESORES ASIGNADOS":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+									"<div class='form-group'>"+
+										"<label for='id1'>ASESOR</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id1' name='id1' class='form-control' value='"+data["jurado"][0]["numTarjeta"]+"' readonly></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor1' name='asesor1' class='form-control' value='"+data["jurado"][0]["nombre"]+"' readonly>"+
+										"</div></div><br>"+
+										"<label for='id2'>REVISOR</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id2' name='id2' class='form-control' value='"+data["jurado"][1]["numTarjeta"]+"' readonly></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor2' name='asesor2' class='form-control' value='"+data["jurado"][1]["nombre"]+"' readonly>"+
+										"</div></div><br>"+
+										"<label for='id3'>REVISOR</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id3' name='id3' class='form-control' value='"+data["jurado"][2]["numTarjeta"]+"' readonly></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["jurado"][2]["nombre"]+"' readonly>"+
+										"</div></div>");
+								$("#modal-submit").hide();
+							break;
+						case "ASESORIA LIBERADA":
+							clearModal();
+							$('#modal-title').html("Agendar al Egresado " + egresado + " con Escolares");
+							$('#modal-description').html('<p style="text-align:center"> Primero seleccione una fecha, luego una hora para agendar la cita.</p>'+
+									'<form method="post" id="updateForm" action="<?php echo $this->basepath("division/revisionEscolares");?>">' +
+					    			'<input type="text" id="datepicker" name="datepicker" size="29" class="center-block" placeholder="Selecciona una fecha" onChange=horas("getHours","ESCOLARES") readonly>' +
+					   	 			'<div id="horas_div">'+
+					    			'<select id="hour" name="hour" class="center-block" required>'+
+					    			'<option value="">hh:mm</option>'+
+					    			'</select>'+
+					    			'</div>'+
+					    			'<input type="hidden" value="'+egresado+'" name="nc" id="nc"><br>'+
+					    			'<input type="hidden" value="REVISION ESCOLARES" name="estado" id="estado">'+
+					    			'<input type="submit" class="btn btn-primary center-block" value="Agendar" >'+
+					    			'</form><br><div style="text-align:center; font-weight:bold"> <a target="_blank" href="<?php echo $this->basepath('uploads/liberaciones/AL');?>'+egresado+'">'+
+					    			'Puedes ver la liberación de asesoría</div></a>');
+							$('#updateForm').attr('onSubmit', "return checkCita('update', 'updateForm', 'division/checkCita','ESCOLARES')" +"<br>"+
+								"<b><a href='../documentos/index/5/"+egresado+"' target= _blank>Pase para Integrar Doc.</a></b>");
+							datePickerEscolares();
+							$('#modal-submit').hide();
+							$("#Modal").modal({show: true});
+							break;
+						case "NO INCONVENIENCIA":
+							$('#modal-submit').off();	
+							$('#modal-title').html("Realizar solicitud de jurado para " + egresado + ".");
+							$("#modal-submit").html("Solicitud de Jurado");
+							$("#modal-submit").addClass("btn btn-primary");
+
+
+var cadfrmfechayhora =  '<p style="text-align:center"> Seleccione una fecha para mostrar los horarios disponibles.</p>'+
+									'<form method="post" id="updateForm" action="<?php echo $this->basepath("division/updateStatus");?>">' +
+					    			'<input type="text" id="datepicker" name="datepicker" size="29" class="center-block" placeholder="Selecciona una fecha" onChange=horas("getHours","TITULACION") readonly>' +
+					   	 			'<div id="horas_div">'+
+					    			'<select id="hour" name="hour" class="center-block" required>'+
+					    			'<option value="">hh:mm</option>'+
+					    			'</select>'+
+					    			'</div>'+
+					    			'<input type="hidden" value="'+egresado+'" name="nc" id="nc"><br>'+
+					    			'<input type="hidden" value="SOLICITUD JURADO" name="estado" id="estado">'+
+					    			'<input type="submit" class="btn btn-primary center-block" value="Solicitar Jurado" >'+
+					    			'</form>'
+
+
+
+					    	$("#modal-description").html($('#modal-description').html()+ cadfrmfechayhora);
+					    	$('#updateForm').attr('onSubmit', "return checkCita('update', 'updateForm', 'division/checkCita','TITULACION')");
+								datePickerEscolares();
+							$("#modal-submit").on('click', function (){
+								$.post("<?php echo $this->basepath("division/nuevoEstadoTramite");?>",
+										{'nc':egresado,
+										'estado':'SOLICITUD JURADO'},
+										function (data, status){
+											if (data["response"]){
+												location.reload();
+												}
+											else
+												alert("Ha ocurrido un error, por favor intente de nuevo.");
+											});
+								});
+							$("#modal-submit").hide();
+							break;	
+						case "JURADO ASIGNADO":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<div class='form-group'>"+
+									"<label for='id1'>PRESIDENTE</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id1' name='id1' class='form-control' value='"+data["juradoT"][0]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor1' name='asesor1' class='form-control' value='"+data["juradoT"][0]["nombre"]+"' readonly>"+
+									"</div></div><br>"+
+									"<label for='id2'>SECRETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id2' name='id2' class='form-control' value='"+data["juradoT"][1]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor2' name='asesor2' class='form-control' value='"+data["juradoT"][1]["nombre"]+"' readonly>"+
+									"</div></div><br>"+
+									"<label for='id3'>VOCAL PROPIETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id3' name='id3' class='form-control' value='"+data["juradoT"][2]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["juradoT"][2]["nombre"]+"' readonly>"+
+									"</div></div><br>"+
+									"<label for='id3'>VOCAL SUPLENTE</label><br><div class='row'><div class='col-sm-4'>"+
+									"<input type='number' id='id3' name='id3' class='form-control' value='"+data["juradoT"][3]["numTarjeta"]+"' readonly></div>"+
+								"<div class='col-sm-8'>"+
+									"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["juradoT"][3]["nombre"]+"' readonly>"+
+								"</div></div></div>"+"<br>"+
+								"<b><a href='../documentos/index/12/"+egresado+"' target=_blank>Aviso de Acto.</a></b>"+"<br>"+
+								"<b><a href='../documentos/index/13/"+egresado+"' target=_blank>Aviso de Hora y Fecha.</a></b>");	
+							$("#modal-submit").html("Agendar Acto");
+							$("#modal-submit").addClass("btn btn-primary");
+							$("#modal-submit").on('click', function (){
+								$.post("<?php echo $this->basepath("division/nuevoEstadoTramite");?>",
+										{'nc':egresado,
+										'estado':'ACTO AGENDADO'},
+										function (data, status){
+											if (data["response"]){
+												location.reload();
+												}
+											else
+												alert("Ha ocurrido un error, por favor intente de nuevo.");
+											});
+								});
+								$("#Modal").modal({show: true});
+								
+							
+							break;		
+						case "ACTO AGENDADO":
+							$('#modal-submit').off();	
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+									"<div class='form-group'>"+
+										"<label for='id1'>PRESIDENTE</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id1' name='id1' class='form-control' value='"+data["juradoT"][0]["numTarjeta"]+"' readonly></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor1' name='asesor1' class='form-control' value='"+data["juradoT"][0]["nombre"]+"' readonly>"+
+										"</div></div><br>"+
+										"<label for='id2'>SECRETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id2' name='id2' class='form-control' value='"+data["juradoT"][1]["numTarjeta"]+"' readonly></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor2' name='asesor2' class='form-control' value='"+data["juradoT"][1]["nombre"]+"' readonly>"+
+										"</div></div><br>"+
+										"<label for='id3'>VOCAL PROPIETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id3' name='id3' class='form-control' value='"+data["juradoT"][2]["numTarjeta"]+"' readonly></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["juradoT"][2]["nombre"]+"' readonly>"+
+										"</div></div><br>"+
+										"<label for='id3'>VOCAL SUPLENTE</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id4' name='id4' class='form-control' value='"+data["juradoT"][3]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor4' name='asesor4' class='form-control' value='"+data["juradoT"][3]["nombre"]+"' readonly>"+
+									"</div></div></div>");	
+									$("#modal-submit").hide();
+
+							break;				
+						default:
+							$("#modal-submit").hide();
+							break;
+					}
+					$("#Modal").modal({show: true});
+				});	
+		$('#modal-submit').on("click", function(){
+			$.post(
+				"division/nuevoEstadoTramite",
+				{"nc":egresado,
+				"estado":"SOLICITUD ASESORES"},
+				function (data, status){
+					if (data["response"]){
+						$("#Modal").modal("hide");
+						location.reload();}
+					else
+						alert("Algo salió mal al solicitar los asesores. Error: 0x01");
+					});
+			});
+		$("#modal-submit").html("Solicitar Asesores");
+		$("#modal-submit").addClass("btn btn-primary");
+	}
+
+	function createLinksReqHTML(id, egresado){
+		$.post("division/getRequisitosByOption",
+				{"id":id},
+				function (data, status){
+					
+					
+				});	
+	}
+
+	function redateModal(egresado){
+		clearModal();
+		$('#modal-title').html("Reagendar al Egresado " + egresado);
+		$('#modal-description').html('<p style="text-align:center"> Primero seleccione una fecha, luego una hora para reagendar la cita.</p>'+
+				'<form method="post" id="updateForm">' +
+    			'<input type="text" id="datepicker" name="datepicker" size="29" class="center-block" placeholder="Selecciona una fecha" onChange=horas("getHours","DIVISION") readonly>' +
+   	 			'<div id="horas_div">'+
+    			'<select id="hour" name="hour" class="center-block" required>'+
+    			'<option value="">hh:mm</option>'+
+    			'</select>'+
+    			'</div>'+
+    			'<input type="hidden" value="'+egresado+'" name="nc" id="nc"><br>'+
+    			'<input type="submit" class="btn btn-primary center-block" value="Reagendar" >'+
+    			'</form>');
+		$('#updateForm').attr('onSubmit', "return checkCita('update', 'updateForm', 'division/checkCita','DIVISION')");
+		datePicker();
+		$('#modal-submit').hide();
+		$("#Modal").modal({show: true});
+	}
+
+	function revokeModal(egresado){
+		clearModal();
+		$('#modal-title').html("Rechazar tr&aacutemite.");
+		$('#modal-description').html("Se encuentra a punto de rechazar el tr&aacutemite del egresado "+egresado+
+				"<br><label for='motivo'>Motivo:</label><select id='motivo' name='motivo' class='form-control' required>"+
+				"<option value='CORRECCION DE DATOS'>CORRECCIÓN DE DATOS</option>"+
+				"<option value='INCUMPLIMIENTO'>INCUMPLIMIENTO DE LA OPCIÓN SELECCIONADA</option></select>");
+		$('#modal-submit').on("click", function(){
+			var motivo=$("#motivo").val();
+			$.post(
+				"division/revokeTramite",
+				{"nc":egresado,
+				"motivo":motivo},
+				function (data, status){
+					$("#Modal").modal("hide");
+					location.reload();
+					});
+			});
+		$("#modal-submit").html("Rechazar");
+		$("#modal-submit").addClass("btn btn-danger");
+		$("#Modal").modal({show: true});	
+	}
+</script>

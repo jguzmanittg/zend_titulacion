@@ -1,0 +1,153 @@
+<?php 
+use function Zend\View\Renderer\basePath;
+
+$this->headScript()->appendFile($this->basepath("js/division/configuracion.js"));
+$this->headScript()->appendFile($this->basepath("js/config/configDate.js"));
+$this->headScript()->appendFile($this->basepath("js/datepicker/horas.js"));
+setlocale(LC_TIME, 'es');
+?>
+<div class="row">
+	<div class="col-sm-2"></div>
+	<div class="col-sm-2">
+		<ul class="nav nav-pills nav-stacked">
+  			<li class="active"><a href="javascript:void(0)"><?php echo utf8_encode("Menú");?></a></li>
+  			<li><a href="javascript:void(0)" onClick="opcionesMenu()"><?php echo utf8_encode("Agregar Opción de Titulación");?></a></li>
+  			<li><a href="javascript:void(0)" onClick="calendarioMenu()">Calendario</a></li>
+  			<!-- <li><a href="javascript:void(0)" onClick="planesMenu()">Planes de Estudio</a></li> -->
+  			<!-- <li><a href="javascript:void(0)" onClick="egresadosMenu()">Egresados</a></li> -->
+		</ul>
+	</div>
+	<div class="col-sm-6" id="contenido">
+<!-- Titulacion -->
+		<div class="" id="opciones" style="display: none">
+	<!--		<h3><?php //echo utf8_encode("Opciones de Titulación");?></h3>
+			<h4 style="text-align: center"><b><?php //echo utf8_encode("Atención: Una vez que el plan tiene datos registrados no se podrá modificar.");?></b></h4>
+			<div style="text-align: center">Mostrar Plan</div>
+			<select name="plan" id="plan" class="center-block">
+				<option value="2008">2008</option>
+				<option value="2012">2012</option>
+			</select>
+			<br>
+			<table id="opciones_tabla">
+				<thead>
+					<tr>
+						<th>Plan</th>
+						<th>Requisito</th>
+						<th>Tipo</th>
+						<th style="text-align: center">Eliminar</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<th>2008</th>
+						<th>Servicio Social</th>
+						<th>Texto</th>
+						<th><h4 style="text-align: center">X</h4></th>
+					</tr>
+					
+					<tr>
+						<th>2012</th>
+						<th><?php //echo utf8_encode("Inglés");?></th>
+						<th>PDF</th>
+						<th><h4 style="text-align: center">X</h4></th>
+					</tr>
+				</tbody>
+			</table><br>
+			<h3>Crear requisito</h3><br>
+			<label>Seleccione el plan al que desea agregar el requisito:</label><br>
+			<select name="nuevo_requisito" id="nuevo_requisito">
+				<option value="2008">2008</option>
+				<option value="2012">2012</option>
+			</select><br>-->
+			<form method="post" action="<?php echo $this->basePath("division/agregarOpcion");?>" enctype="multipart/form-data">
+				<label for="plan">Seleccione un plan: </label>
+				<select name="plan" id="plan" class="form-control" required>
+					<?php 
+	       			    foreach ($planes as $plan):
+		      		        echo "<option value='".$plan['plan']."'>".$plan['plan']."</option>";
+			     	    endforeach;
+		    		?>
+				</select>
+				<label for="nombre">Nombre de la <?php echo utf8_encode("opción:");?></label>
+				<input type="text" name="nombre" id="nombre" class="form-control" required>
+				<label for="descripcion"><?php echo utf8_encode("Descripción o detalles de la opción:");?></label>
+				<textarea name="descripcion" id="descripcion" maxlength="700" class="form-control" required>
+				</textarea> <br>
+				<label for="tiempo">Tiempo asignado para concluir el proceso. (En meses)</label>
+				<input type="number" name="tiempo" id="tiempo" class="form-control" required><br>
+				<label for="numero"><?php echo utf8_encode("Número de la opción. (En números romanos)");?></label>
+				<input type="text" name="numero" id="numero" class="form-control" required><br>
+				<label for="imagen">Logo</label>
+				<input type="file" name="imagen" id="imagen" class="form-control" required>
+				<br>
+					<!-- <input type="radio" value="Texto" name="type">Texto<br>
+		    		<input type="radio" value="Archivo" name="type">Archivo
+		           	<br>-->
+			<input type="submit" class="btn btn-primary" value="Agregar">
+			</form>
+		</div>
+<!-- Calendario -->
+		<div class="" id="calendario" style="display: none">
+			<h3>Calendario</h3>
+			<div style="text-align: justify">
+				<form action="" onSubmit="return updateDates('updateDates')" id="calendarioForm" method="post">
+					<br>
+					<h4 style="color: black; font-size: large"><?php echo utf8_encode("Período de atención");?></h4><br>
+					<p id="calendario_info"><?php echo utf8_encode("Actualmente el período de atención es del <b>".strftime('%d de %B de %Y',strtotime($config[0]['f_inicio']))."</b> al <b>".strftime('%d de %B de %Y',strtotime($config[0]['f_fin']))."</b>,
+					   si desea suspender el período actual ingrese una fecha anterior. 
+					   Las citas agendadas dentro del período se mantendrán.");?></p><br>
+					<h4 style="color: black; font-size: large">Calendario Actual</h4>
+					<br><input type="text" id="datepicker" name="datepicker" size="29" placeholder="Selecciona una fecha" readonly>
+					<br><br><h4 style="color: black; font-size: large">Nuevo Horario</h4><br>
+					<div>
+						<label> Del </label>
+						<input type="date" id="f_inicio" name="f_inicio" required>
+						<label> al </label>
+						<input type="date" id="f_fin" name="f_fin" required>
+						<label> a partir de las </label>
+						<input type="time" id="h_inicio" name="h_inicio" value="<?php echo $config[0]['h_inicio'];?>" required>
+						<label> hasta </label>
+						<input type="time" id="h_fin" name="h_fin" value="<?php echo $config[0]['h_fin'];?>" required>
+						<label> con un intervalo de </label>
+						<input type="number" id="intervalo" name="intervalo" min=1 max=60 value="<?php echo $config[0]['intervalo'];?>">
+						<label> minutos. </label><br>
+						<button type="submit" class="btn btn-primary center-block">Actualizar</button>
+					</div>
+				</form>
+			<br>
+			</div>
+		</div>
+<!-- Egresados -->
+		<div class="" id="egresados" style="display: none">
+			<h3>Egresados</h3>
+		</div>
+<!-- Planes -->
+		<div class="" id="planes" style="display: none">
+			<h3>Planes</h3>
+		</div>
+	</div>
+	<div class="col-sm-2"></div>
+</div>
+
+<script>	
+<?php 
+    echo "var holidays =".json_encode($holidays)."; ";
+	echo "var parts_i = '".$config[0]['f_inicio']."'.split('-'); ";
+	echo "var parts_f = '".$config[0]['f_fin']."'.split('-'); ";	
+?>  
+	var inicio = Date.UTC(parts_i[0], parts_i[1]-1, parts_i[2]);
+	var fin = Date.UTC(parts_f[0], parts_f[1]-1, parts_f[2]);
+	$( function() {
+		$('#opciones_tabla').DataTable();
+		datePicker();
+	} ); 
+
+	$('#plan').change(function(){
+		var temp = $('#opciones_tabla').DataTable();
+		temp
+			.column(0)
+			.search("^" + $(this).val() + "$", true, false, true)
+			.draw();
+	});
+	  	
+</script>

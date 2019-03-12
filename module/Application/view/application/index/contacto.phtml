@@ -1,0 +1,36 @@
+    <section id="content"><div class="ic"></div>
+        <div class="container_12">	
+          <div class="grid_12">
+            <div class="wrap pad-3">
+                <div class="block-5">
+                    <h3 class="p5">Informaci&oacute;n</h3>
+                    <div class="map img-border">
+                      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3820.3554949745803!2d-93.17158347406615!3d16.758979985881798!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85ecd97b5e826c4b%3A0x7a525222e0c3b862!2sInstituto+Tecnol%C3%B3gico+de+Tuxtla+Guit%C3%A9rrez!5e0!3m2!1ses!2smx!4v1433002245717" width="600" height="450" style="border:0"></iframe>
+                    </div>
+                    <dl>
+                        <dt>Instituto Tecnol&oacute;gico de Tuxtla Guti&eacute;rrez<br>Carretera Panamericana Kil&oacute;metro 1080, Ter&aacute;n, 29050 Tuxtla Guti&eacute;rrez, Chis</dt>
+                        <dd><span>Encargado: </span>Lic. Elin</dd>
+						<dd><span>Telefono: </span>615 7441</dd>
+                        <dd><span>Fax: </span>+1 800 889 9898</dd>
+                        <dd><span>E-mail: </span><a href="#" class="link">contacto@ittg.edu.mx</a></dd>
+                    </dl> 
+                </div>
+                <div class="block-6">
+                    <h3>Dudas</h3>
+                    <form id="form" method="post" >
+					
+                      <fieldset>
+                        <label><input type="text" value="Nombre" onBlur="if(this.value=='') this.value='Nombre'" onFocus="if(this.value =='Nombre' ) this.value=''"></label>
+                        <label><input type="text" value="Email" onBlur="if(this.value=='') this.value='Email'" onFocus="if(this.value =='Email' ) this.value=''"></label>
+                        <label><input type="text" value=<?php echo utf8_encode("Teléfono");?> onBlur="if(this.value=='') this.value='Tel&eacute;fono'" onFocus="if(this.value =='Teléfono' ) this.value=''"></label>
+                        <label><textarea name="Mensaje" onBlur="if(this.value=='') this.value='Mensaje'" onFocus="if(this.value=='Mensaje') this.value=''">Mensaje</textarea></label>
+                        <div class="btns"><a href="#" class="button">Borrar</a><a href="#" class="button" onClick="document.getElementById('form').submit()">Enviar</a></div>
+                      </fieldset> 				  
+                    </form> 
+                </div>
+            </div>
+          </div>
+          <div class="clear"></div>
+          <br><br>
+        </div>
+    </section> 

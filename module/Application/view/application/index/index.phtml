@@ -1,0 +1,117 @@
+<?php 
+    $this->headScript()->appendFile($this->basepath("js/api.js"));
+?>
+  <div id="content_div">
+    <div class="ic"></div>
+        <div class="container_12">
+          <div class="grid_12">
+            <div class="wrap pad-3">
+                
+            </div>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <div class="aside">
+            <div class="container_12">
+                <div>
+                 <h2 style="text-align:center">Bienvenido</h2>
+                 <br>
+                 <h3 style="text-align:center">Inicia sesi&oacute;n para continuar</h3>
+               	<div id="Egresados" class="modalDialog">
+                            <div>                           
+							<a href="#close" title="Close" class="close">X</a>
+							<h3>Egresados</h3>
+                            <br>
+                            <form method="post" id="egresado" class="signin" action="<?php echo $this->basePath();?>/application/index/egresado">
+        					<fieldset class="textbox">
+        						<label class="username">
+                                <input id="username_e" name="username_e" value="" type="text" autocomplete="on" placeholder="N&uacute;mero de Control" required>
+        						</label>
+        						<label class="password">
+                                <input id="password_e" name="password_e" value="" type="password" placeholder="Contrase&nacute;a" required>
+        						</label>
+        						<?php 
+        						if ($api)
+        						    echo '<input type="submit" name="b_egresado" id="b_egresado" class="submit button" value="Acceso"><!-- API disabled-->';
+        						else
+        						    echo '<input type="button" name="b_egresado" id="b_egresado" class="submit button" value="Acceso" onClick="buscar_egresado()"><!-- API enabled-->';
+        						
+                                ?>
+                                <input type="hidden" id="nombre_e" name="nombre_e" value="">
+                                <input type="hidden" id="apellidos_e" name="apellidos_e" value="">
+                                <input type="hidden" id="nombreComp_e" name="nombreComp_e" value="">
+                                <input type="hidden" id="carrera_e" name="carrera_e" value="">
+                                <input type="hidden" id="clave_e" name="clave_e" value="">    
+                                <input type="hidden" id="adeudo_e" name="adeudo_e" value="">                                 
+        					</fieldset>
+  							</form>
+                            </div>
+                            </div> 
+                 <div id="Division" class="modalDialog">
+						
+                          <div>                           
+							<a href="#close" title="Close" class="close">X</a>
+							<h3>Divisi&oacute;n</h3>
+                            <br>
+                            <form method="post" id="personal" class="signin" action="<?php echo $this->basepath();?>/application/index/division">
+        					<fieldset class="textbox">
+        						<label class="username">
+                                <input id="username_d" name="username_d" value="" type="text" autocomplete="on" placeholder="N&uacute;mero de Tarjeta" required>
+        						</label>
+        						<label class="password">
+                                <input id="password_d" name="password_d" value="" type="password" placeholder="Contrase&ntilde;a" required>
+        						</label>
+        						
+        						<input type="submit" name="b_division" id="b_division" class="submit button" value="Acceso">   
+                                <input type="hidden" id="nombre_p" name="nombre_p" value="">  
+                                <input type="hidden" id="rfc_p" name="rfc_p" value="">
+                                <input type="hidden" id="apellidos_p" name="apellidos_p" value="">
+                                <input type="hidden" id="nombreComp_p" name="nombreComp_p" value="">
+                                <input type="hidden" id="cedula_p" name="cedula_p" value="">  
+        					</fieldset>
+  							</form>
+						</div>
+                        </div>
+                 <div id="Academia" class="modalDialog">
+                            <div>                           
+							<a href="#close" title="Close" class="close">X</a>
+							<h3>Academia</h3>
+                            <br>
+                            <form method="post" id="academia" class="signin" action="<?php echo $this->basepath();?>/application/index/academia">
+        					<fieldset class="textbox">
+        						<label class="username">
+                                <input id="username_a" name="username_a" value="" type="text" autocomplete="on" placeholder="Usuario" required>
+        						</label>
+        						<label class="password">
+                                <input id="password_a" name="password_a" value="" type="password" placeholder="Contrase&nacute;a" required>
+        						</label>
+        						<input type="submit" name="b_academia" id="b_academia" class="submit button" value="Acceso">                                 
+        					</fieldset>
+  							</form>
+                            </div>
+                            </div> 
+                            
+                            <div id="Escolares" class="modalDialog">
+                            <div>                           
+							<a href="#close" title="Close" class="close">X</a>
+							<h3>Escolares</h3>
+                            <br>
+                            <form method="post" id="escolares" class="signin" action="<?php echo $this->basePath();?>/application/index/escolares">
+        					<fieldset class="textbox">
+        						<label class="username">
+                                <input id="username_es" name="username_es" value="" type="text" autocomplete="on" placeholder="Usuario" required>
+        						</label>
+        						<label class="password">
+                                <input id="password_es" name="password_es" value="" type="password" placeholder="Contrase&nacute;a" required>
+        						</label>
+        						<input type="submit" name="b_escolares" id="b_escolares" class="submit button" value="Acceso">                                 
+        					</fieldset>
+  							</form>
+                            </div>
+                            </div> 
+					  
+                </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+            </div>

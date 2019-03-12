@@ -1,0 +1,278 @@
+<?php
+use function Zend\View\Renderer\basePath;
+?>
+<div class="row">
+	<div class="col-sm-2"></div>
+	<div class="col-sm-8">
+		<table id="data-table" class="display" style="border-collapse: collapse; border-spacing: 0; width:100%;">
+			<thead>
+				<tr>
+					<th style="text-align: center; white-space: nowrap;">Estado</th>
+            		<th style="text-align: center; white-space: nowrap;">NC</th>
+                	<th style="text-align: center; white-space: nowrap;">Nombre</th>
+                	<th style="text-align: center; white-space: nowrap;">Carrera</th>
+                	<th style="text-align: center; white-space: nowrap;">Opción</th>                	
+                	<th style="text-align: center; white-space: nowrap;">Cita</th>
+                	<th style="text-align: center; white-space: nowrap;">Acciones</th>
+            	</tr>
+			</thead>
+			<tbody style="color:black">
+	<?php 
+	setlocale(LC_TIME, 'es');
+        foreach($tramites as $item):
+            echo "  <tr>
+		               <td style='text-align: center; font-size: x-small; white-space: nowrap;'>".$item["estado"]."</td>
+            		   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["Egresado_numControl"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["nombreComp"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["carrera"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".$item["nombre"]."</td>
+                	   <td style='text-align: center; font-size: small; white-space: nowrap;'>".strftime('%d de %B de %Y',strtotime($item['fecha']))." a las ".substr($item['hora'], 0, 5)." hrs.</td>
+            	       <td>
+	                       <button type='button' class='btn btn-xs center-block' aria-label='Left Align' onClick=infoModal('".$item["Egresado_numControl"]."')>
+                                <span class='glyphicon glyphicon-th-large' aria-hidden='true'>
+	                            </span>
+                           </button>
+	                   </td>
+	               </tr>";
+        endforeach;
+    ?>
+    		</tbody>
+    	</table>
+	</div>
+	<div class="col-sm-2"></div>
+</div>
+
+<!-- <Modal> -->
+<div id="Modal" class="modal fade" role="dialog">
+	  <div class="modal-dialog">
+	    <!--Contenido-->
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h4 class="modal-title" style="font-weight:bold" id="modal-title"></h4>
+	      </div>
+	      <div class="modal-body">
+	        <p id="modal-description" style="text-align: justify; color:black"></p><br>
+	        <div id="modal-inputs" style="font-weight:bold; color: #426eb5">
+	        </div>
+	      </div>
+	      <div class="modal-footer">
+	     		 <button type="button" class="btn btn-primary" id="modal-submit"></button>
+	     		 <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+	      </div>
+	    </div>	
+	  </div>
+</div>
+<!-- </Modal> -->
+<script>
+$(document).ready(function() {
+	var table =
+		$('#data-table').DataTable({
+			scrollX: true,
+			});
+	
+	new $.fn.dataTable.FixedColumns( table, {
+			leftColumns:0, rightColumns:1
+		});
+});
+
+function clearModal(){
+	$("#id1").off();
+	$("#id2").off();
+	$("#id3").off();
+	$('#modal-title').html("");
+	$('#modal-description').html("");
+	$('#modal-inputs').html("");
+	$('#modal-submit').html("");	
+	$('#modal-submit').off();	
+	$('#modal-submit').show();
+	$('#modal-submit').removeClass();
+}
+
+function infoModal(egresado){
+	clearModal();
+	$('#modal-title').html("Informaci&oacuten del Egresado " + egresado);
+	$.post("academia/getEgresadoInfo",
+			{"egresado":egresado},
+			function (data, status){
+				var html="";
+				$('#modal-description').html("<h3>"+data["info"][0]["nombre"]+"</h3>"+
+						"<b>Nombre:</b>"+decodeURIComponent(escape(data["info"][0]["nombreComp"]))+"<br>");
+				$.each(data["docs"], function (key, value){
+					html=html+"<b>"+unescape(value["nombre"])+":</b> "+decodeURIComponent(escape(value["datos"]))+"<br>";
+				});
+				$('#modal-description').html($('#modal-description').html()+html+"<br><b>Documentos</b><br>");
+				createLinksReqHTML(data["info"][0]["idOpciones"], egresado);
+					switch(data["info"][0]["estado"]){
+						
+						case "SOLICITUD ASESORES":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<div class='form-group'><form id='asignarAsesores' method='post' action='<?php echo $this->basePath();?>/academia/asignarAsesores'>"+
+									"<label for='id1'>ASESOR</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id1' name='id1' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id1','asesor1');  required></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor1' name='asesor1' class='form-control' placeholder='NOMBRE' readonly required>"+
+									"</div></div><br>"+
+									"<label for='id2'>REVISOR</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id2' name='id2' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id2','asesor2');  required></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor2' name='asesor2' class='form-control' placeholder='NOMBRE' readonly required>"+
+									"</div></div><br>"+
+									"<label for='id3'>REVISOR</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id3' name='id3' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id3','asesor3');  required></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor3' name='asesor3' class='form-control' placeholder='NOMBRE' readonly required>"+
+									"</div></div>"+
+								"<input type='hidden' name='nc' value='"+egresado+"'>"+
+								"<input type='hidden' name='estado' value='ASESORES ASIGNADOS'></form></div>");
+							$("#modal-submit").attr("form", "asignarAsesores");
+							$("#modal-submit").attr("type", "submit");
+							$("#modal-submit").html("Asignar Asesores");
+							$("#modal-submit").addClass("btn btn-primary");
+							break;
+						case "SOLICITUD JURADO":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<div class='form-group'><form id='asignarAsesores' method='post' action='<?php echo $this->basePath();?>/academia/asignarJurado'>"+
+									"<label for='id1'>PRESIDENTE</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id1' name='id1' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id1','asesor1'); value='"+data["jurado"][0]["numTarjeta"]+"' required></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor1' name='asesor1' class='form-control' placeholder='NOMBRE' value='"+data["jurado"][0]["nombre"]+"'  required>"+
+										"</div></div><br>"+
+									"<label for='id2'>SECRETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id2' name='id2' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id2','asesor2'); value='"+data["jurado"][1]["numTarjeta"]+"' required></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor2' name='asesor2' class='form-control' placeholder='NOMBRE' value='"+data["jurado"][1]["nombre"]+"'  required>"+
+										"</div></div><br>"+
+									"<label for='id3'>VOCAL PROPIETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id3' name='id3' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id3','asesor3'); value='"+data["jurado"][2]["numTarjeta"]+"' required></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor3' name='asesor3' class='form-control' placeholder='NOMBRE' value='"+data["jurado"][2]["nombre"]+"'  required></div></div><br>"+
+									"<label for='id3'>VOCAL SUPLENTE</label><br><div class='row'><div class='col-sm-4'>"+
+											"<input type='number' id='id4' name='id4' class='form-control' placeholder='TARJETA' onKeyUp=lookForAsesores('id4','asesor4'); required></div>"+
+										"<div class='col-sm-8'>"+
+											"<input type='text' id='asesor4' name='asesor4' class='form-control' placeholder='NOMBRE' required></div></div>"+
+								"<input type='hidden' name='nc' value='"+egresado+"'>"+
+								"<input type='hidden' name='estado' value='JURADO ASIGNADO'></form></div>");
+							$("#modal-submit").attr("form", "asignarAsesores");
+							$("#modal-submit").attr("type", "submit");
+							$("#modal-submit").html("Asignar Jurado");
+							$("#modal-submit").addClass("btn btn-primary");
+							break;
+						case "ASESORES ASIGNADOS":
+							var html="";
+							html += "<div class='form-group'>"+
+									"<label for='id1'>ASESOR 1</label><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id1' name='id1' class='form-control' value='"+data["jurado"][0]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor1' name='asesor1' class='form-control' value='"+data["jurado"][0]["nombre"]+"' readonly>"+
+									"</div></div>"+
+									"<label for='id2'>ASESOR 2</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id2' name='id2' class='form-control' value='"+data["jurado"][1]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor2' name='asesor2' class='form-control' value='"+data["jurado"][1]["nombre"]+"' readonly>"+
+									"</div></div>"+
+									"<label for='id3'>ASESOR 3</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id3' name='id3' class='form-control' value='"+data["jurado"][2]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["jurado"][2]["nombre"]+"' readonly>"+
+									"</div></div>"+
+								"</div>";
+							html += "<form method='post' id='liberarAsesoria' onSubmit='return checkLiberacion(this);' action='<?php echo $this->basepath("academia/liberarAsesoria");?>' enctype='multipart/form-data'>"+"FORMATO CON FIRMAS ESCANEADO: <input type='file' name='liberacion' id='liberacion' class='form-control' required>"+
+								"<input type='hidden' name='nc' id='nc' value='"+egresado+"'>"+
+								"<input type='hidden' name='estado' id='estado' value='ASESORIA LIBERADA'>"+"</form>";
+
+							html +="<br> IMPRIMIR:<br>" +
+								"<p style='font-weight: bold; color:#426eb5;text-align: left;'><a href='../documentos/index/3/"+egresado+"' target=_blank>Aval de academia</a></p>";
+							html +=
+								"<p style='font-weight: bold; color:#426eb5;text-align: left;'><a href='../documentos/index/4/"+egresado+"' target=_blank>Formato de liberación</a></p>";
+
+
+
+							$('#modal-description').html($('#modal-description').html()+html);
+							$("#modal-submit").html("Liberar Asesoría");
+							$("#modal-submit").addClass("btn btn-primary");
+							$("#modal-submit").attr("form", "liberarAsesoria");
+							$("#modal-submit").attr("type", "submit");
+
+							break;
+						case "JURADO ASIGNADO":
+							$('#modal-description').html($('#modal-description').html()+"<br>"+
+								"<div class='form-group'>"+
+									"<label for='id1'>PRESIDENTE</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id1' name='id1' class='form-control' value='"+data["juradoT"][0]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor1' name='asesor1' class='form-control' value='"+data["juradoT"][0]["nombre"]+"' readonly>"+
+									"</div></div><br>"+
+									"<label for='id2'>SECRETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id2' name='id2' class='form-control' value='"+data["juradoT"][1]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor2' name='asesor2' class='form-control' value='"+data["juradoT"][1]["nombre"]+"' readonly>"+
+									"</div></div><br>"+
+									"<label for='id3'>VOCAL PROPIETARIO</label><br><div class='row'><div class='col-sm-4'>"+
+										"<input type='number' id='id3' name='id3' class='form-control' value='"+data["juradoT"][2]["numTarjeta"]+"' readonly></div>"+
+									"<div class='col-sm-8'>"+
+										"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["juradoT"][2]["nombre"]+"' readonly>"+
+									"</div></div><br>"+
+									"<label for='id3'>VOCAL SUPLENTE</label><br><div class='row'><div class='col-sm-4'>"+
+									"<input type='number' id='id3' name='id3' class='form-control' value='"+data["juradoT"][3]["numTarjeta"]+"' readonly></div>"+
+								"<div class='col-sm-8'>"+
+									"<input type='text' id='asesor3' name='asesor3' class='form-control' value='"+data["juradoT"][3]["nombre"]+"' readonly>"+
+								"</div></div></div>"+"<br>"+
+								"<p style='font-weight: bold; color:#426eb5;text-align: center;'><a href='../documentos/index/11/"+egresado+"' target=_blank>Asignaci&oacute;n de Jurado</a></p>");		
+								$("#modal-submit").hide();
+							break;
+						default:
+							$("#modal-submit").hide();
+							break;
+					}
+				$("#Modal").modal({show: true});
+			});
+	
+}
+
+function createLinksReqHTML(id, egresado){
+	$.post("division/getRequisitosByOption",
+			{"id":id},
+			function (data, status){
+				var html="";
+				$.each(data["requisitos"], function (key, value){
+					html="<a href='<?php echo $this->basePath();?>/uploads/"+value["idRequisitos"]+egresado+"' target='_blank'>"+value["nombre"]+"</a><br>";
+				});
+				$('#modal-description').html($('#modal-description').html()+html);
+				
+			});	
+}
+
+function checkLiberacion(form){
+	var formData = new FormData(form);
+    $.ajax({
+    	url: $(form).attr('action'),
+        type: $(form).attr('method'),
+        data: formData,
+        async: true,
+        success: function (data) {
+        	if(data["code"]=="OK"){
+            	alert("Se ha liberado la asesoría con éxito");
+            	location.reload();
+            }
+        	else if (typeof data["code"]!== 'undefined')alert ("El documento " + data["error"] + " tuvo un problema al ser guardado. " + data["code"]);
+            else alert("Ha ocurrido un error desconocido al momento de subir los archivos, verifica que estos sean del formato PDF/JPG/JPEG/PNG y no excedan los 2MB");
+       
+        },
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+return false;
+}
+
+function lookForAsesores(id, set){
+	$("#"+set).val("");
+	$.post("academia/lookForAsesoresByNum",
+			{"nt":$("#"+id).val()},
+			function (data, status){
+				$("#"+set).val(data["jurado"][0]["Nombre"]);
+			});
+}
+
+
+</script>

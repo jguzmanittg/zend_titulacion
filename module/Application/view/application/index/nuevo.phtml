@@ -1,0 +1,57 @@
+<div id="content_div">
+            <div class="container_12">
+                <div class="grid_12" style="text-align: center">                   
+                    <form action="<?php echo $this->basePath();?>/application/index/guardar" method="post">
+						<h2>Registra tus datos</h2>
+				 		<input name="numControl" placeholder="Número de control" type="text" value="<?php echo $nc; ?>" style="min-width: 40%" readonly><br>
+				 		<input name="nombre" placeholder="Nombre" type="text" value="<?php $nombre; ?>" style="min-width: 40%" required><br>
+                        <input name="apellidos" placeholder="Apellidos" type="text" value="<?php echo $apellidos; ?>" style="min-width: 40%" required><br>
+                        <input name="nombreComp" placeholder="Nombre Completo" type="text" value="<?php echo $completo;?>" style="min-width: 40%" required><br>
+                        <?php 
+                            if ($carrera==""){
+                        ?>
+                        <select name="carrera" style="min-width: 40%" required>
+                        	<option value=''>Licenciatura</option>
+                        <?php 
+                            foreach ($carreras as $carrera):
+                                echo "<option value='".$carrera['carrera']."'>".$carrera['carrera']."</option>";
+                            endforeach;
+                        ?>
+                        </select>
+                        <?php 
+                            }
+                            else{
+                        ?>
+                        	<input type="text" name="carrera" value="<?php echo $carrera;?>" style="min-width: 40%" readonly>
+                        <?php 
+                            }
+                        ?>
+                        <br>
+                        <?php 
+                            if ($clave==""){
+                        ?>
+                        <select name="plan" style="min-width: 40%" required>
+                        	<option value=''>Plan de Estudios</option>
+                        <?php 
+                            foreach ($planes as $plan):
+                                echo "<option value='".$plan['plan']."'>".$plan['plan']."</option>";
+                            endforeach;
+                        ?>
+                        </select>
+                        <?php 
+                            }
+                            else{                            
+                            ?>
+                            <input type="text" name="plan" value="<?php echo $clave;?>" style="min-width: 40%" readonly>
+                            <?php 
+                            }
+                            ?>
+                        <br>
+                        <input name="correo" placeholder="Correo" type="text" value="" style="min-width: 40%" required><br>
+                        <input type="password" name="password" placeholder="Nueva contrase&ntilde;a" value="" style="min-width: 40%" required><br>
+                        <input type="hidden" name="adeudo" value="<?php if($adeudo!="")echo $adeudo; else echo "N";?>">
+						<input type="submit" name="registrar" value="Registar"/>
+            		</form>
+            		</div>					
+              </div>
+</div>

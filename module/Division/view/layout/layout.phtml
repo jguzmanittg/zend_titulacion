@@ -1,0 +1,62 @@
+<?php use function Zend\View\Renderer\basePath;
+
+echo $this->doctype(); ?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Sistema de Titulaci&oacute;n</title>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="<?php echo $this->basePath();?>/img/favicon.png">
+     <?php
+        $this->headLink()
+                ->appendStylesheet($this->basePath("css/bootstrap.css"))
+                ->appendStylesheet("https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css")
+                ->appendStylesheet($this->basePath("css/reset.css"))
+                ->appendStylesheet($this->basePath("css/style.css"))
+                ->appendStylesheet($this->basePath("css/grid_12.css"))
+                ->appendStylesheet("https://cdn.datatables.net/v/dt/dt-1.10.12/b-1.2.2/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/se-1.2.0/datatables.min.css")
+                ->appendStylesheet($this->basePath("css/modalDialog.css"));
+        echo $this->headLink();
+        
+        
+        $this->headScript()
+                ->appendFile("https://code.jquery.com/jquery-1.12.4.js")
+                ->appendFile("https://code.jquery.com/ui/1.12.1/jquery-ui.js")
+                ->appendFile("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js")
+                ->appendFile("https://cdn.datatables.net/v/dt/dt-1.10.12/b-1.2.2/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/se-1.2.0/datatables.min.js")
+                ->appendFile($this->basePath("js/jquery.ui.datepicker-es.js"));
+            echo $this->headScript();?>
+
+</head>
+  <!--==============================header=================================-->
+<div id="wrapper">
+<div id="header">
+<header>
+	<h1 style="text-align:center; font-weight:bold"><a href="<?php echo $this->basePath();?>/division"><img src="<?php echo $this->basePath();?>/img/tec.png" alt="" height="90" width="90"></a><span style="font-style: italic;"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </span>Sistema de apoyo para titulaci&oacute;n</h1>
+                <div class="clear"></div>
+        <nav class="box-shadow">
+           <div>
+                <ul class="menu">
+                    <li class="home-page"><a href="<?php echo $this->basePath();?>/division"><span></span></a></li>
+                    <li><a href="<?php echo $this->basePath();?>/division/configuracion"><?php echo utf8_encode("Configuración");?></a></li>
+					<li><a href="<?php echo $this->basePath();?>/division/cerrar"><?php echo utf8_encode("Cerrar sesión");?></a></li>
+                	<li style="font-size: 13px; line-height: 17px; color: #fff; font-weight: bold; display: block; padding: 23px 28px 24px 28px;">Bienvenido, <?php echo utf8_encode("División de Estudios");?></li>
+                </ul>                
+                <div class="clear"></div>
+            </div>
+        </nav>
+</header>
+</div>
+<div id="content">
+            <?php echo $this->content; ?>
+</div>
+<div id="footer">
+    <footer>
+		<p>Instituto Tecnol&oacute;gico de Tuxtla Guti&eacute;rrez</p>
+        <p>Carretera Panamericana Kil&oacute;metro 1080, Ter&aacute;n, 29050 Tuxtla Guti&eacute;rrez, Chiapas</p>
+        <p>Tel. 615 7441</p>
+    </footer>
+</div>
+</div>
+</html>

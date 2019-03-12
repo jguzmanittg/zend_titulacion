@@ -1,0 +1,44 @@
+<?php use function Zend\View\Renderer\basePath;
+
+echo $this->doctype(); ?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>Sistema de Titulaci&oacute;n</title>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="<?php echo $this->basePath();?>/img/favicon.png">
+     <?php
+        $this->headLink()
+                ->appendStylesheet($this->basePath("css/bootstrap.css"))
+                ->appendStylesheet("https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css")
+                ->appendStylesheet($this->basePath("css/reset.css"))
+                ->appendStylesheet($this->basePath("css/style.css"))
+                ->appendStylesheet($this->basePath("css/grid_12.css"))
+                ->appendStylesheet("https://cdn.datatables.net/v/dt/dt-1.10.12/b-1.2.2/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/se-1.2.0/datatables.min.css")
+                ->appendStylesheet($this->basePath("css/modalDialog.css"));
+        echo $this->headLink();
+        
+        
+        $this->headScript()
+                ->appendFile("https://code.jquery.com/jquery-1.12.4.js")
+                ->appendFile("https://code.jquery.com/ui/1.12.1/jquery-ui.js")
+                ->appendFile("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js")
+                ->appendFile("https://cdn.datatables.net/v/dt/dt-1.10.12/b-1.2.2/fc-3.2.2/fh-3.1.2/r-2.1.0/sc-1.4.2/se-1.2.0/datatables.min.js")
+                ->appendFile($this->basePath("js/jquery.ui.datepicker-es.js"));
+            echo $this->headScript();?>
+
+</head>
+  <!--==============================header=================================-->
+<div id="wrapper">
+<div id="header">
+<header>
+
+</header>
+</div>
+<div id="content">
+            <?php echo $this->content; ?>
+</div>
+
+</div>
+</html>

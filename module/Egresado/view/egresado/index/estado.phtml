@@ -1,0 +1,29 @@
+<div id='bienvenida'>
+<div class="col-sm-12" style="text-align: center"><h3>
+Bienvenido, 
+<?php
+    echo $username;  
+    $this->headScript()->appendFile($this->basepath("js/egresado/checkDatos.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/checkCita.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/createInput.js"));
+    $this->headScript()->appendFile($this->basepath("js/datepicker/horas.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/mostrarInfo.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/regresar.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/setRequisito.js"));
+    $this->headScript()->appendFile($this->basepath("js/egresado/showDescripcion.js"));    
+?>
+</h3></div><br>
+Tu tramite se encuentra en estado "<?PHP echo $status; ?> por lo que : 
+
+<?php 
+    switch ($status){
+	case 'NUEVO':
+?>
+
+<?php 
+	break;
+    	case 'CITA AGENDADA':
+?>
+<?php 
+}
+?>  
